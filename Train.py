@@ -312,7 +312,8 @@ def Train(model, images_path: str, labels_path: str,
     if not os.path.exists(save_images_dir):
         os.makedirs(save_images_dir)
         print(f'生成目录:{save_images_dir}')
-    run_dir = "./model_run"
+    current_time = datetime.now().strftime("%Y%m%d_%H%M%S")
+    run_dir = f"./run/model_run_{current_time}"
 
     # 创建模型运行结果保存目录
     if not os.path.exists(run_dir):
@@ -353,18 +354,27 @@ def Train(model, images_path: str, labels_path: str,
     train_count = 0
 
     try:
-        weight_path = get_unique_folder_name(base_weight_path)
-        for i in range(epoch_count):
-            avg_loss = train_epoch(model, dataloader, loss_fn, optimizer, scheduler, device, i, step_data, metrics_data,
-                                   grad_data, lr_data, save_images_dir)
+        # 获取唯一的权重保存目录
+        weight_dir = get_unique_folder_name(base_weight_path)
 
-            # 保存当前权重、最佳权重
+        # 构造完整的权重文件路径（不立即写入）
+        best_weight_path = os.path.join(weight_dir, f"best_{type(model).__name__}_weight.pth")
+        final_weight_path = os.path.join(weight_dir, f"end_{type(model).__name__}_weight.pth")
+
+        min_loss = float('inf')
+
+        for i in range(epoch_count):
+            avg_loss = train_epoch(model, dataloader, loss_fn, optimizer, scheduler, device, i,
+                                   step_data, metrics_data, grad_data, lr_data, save_images_dir)
+            # 保存最佳权重和最终权重
             if isSaveWeight:
-                weight_path = os.path.join(weight_path, f'end_{type(model).__name__}_weight.pth')
-                torch.save(model.state_dict(), weight_path)
-                if min_loss > avg_loss and train_count != 0:
+                # 保存最终权重（每个 epoch 都覆盖）
+                torch.save(model.state_dict(), final_weight_path)
+
+                # 如果当前 loss 更小，则保存为最佳权重
+                if avg_loss < min_loss:
                     min_loss = avg_loss
-                    torch.save(model.state_dict(), weight_path.replace('end', 'best'))
+                    torch.save(model.state_dict(), best_weight_path)
 
             # 内存优化
             gc.collect()
@@ -407,14 +417,23 @@ def Train(model, images_path: str, labels_path: str,
 
 
 if __name__ == "__main__":
-    # images_path = r"E:\数据集\Training_Input_PCA"
-    # # images_path = r"E:\数据集\ISIC2018_Task1-2_Training_Input"
-    # label_path = r"E:\数据集\ISIC2018_Task1_Training_GroundTruth"
-    images_path = r"E:\数据集\ISIC2018_Task1-2_Validation_Input"
-    # images_val_path = r"E:\数据集\Val_Input_PCA"
-    label_path = r"E:\数据集\ISIC2018_Task1_Validation_GroundTruth"
+    images_path = r"../data/黑色素瘤分割/黑色素瘤分割/ISIC2018_Task1-2_Training_Input"
+    label_path = r"../data/黑色素瘤分割/黑色素瘤分割/ISIC2018_Task1_Training_GroundTruth"
+
+    images_path_pca = r"../data/黑色素瘤分割/黑色素瘤分割/Training_Input_PCA"
+
+    batch_size = 4
+    epoch_count = 50
+    lr = 0.001
     # 加载预训练模型
+    # U
     model = load_model('Unet', image_size=(400, 400), isLoadWeight=False)
     if model is not None:
         # 开始训练
-        Train(model, images_path, label_path, batch_size=1, epoch_count=1, lr=0.001, isSaveWeight=True)
+        Train(model, images_path, label_path, batch_size=batch_size, epoch_count=epoch_count, lr=lr, isSaveWeight=True)
+
+    model = load_model('Unet', image_size=(400, 400), isLoadWeight=False)
+    if model is not None:
+        # 开始训练
+        Train(model, images_path_pca, label_path, batch_size=batch_size, epoch_count=epoch_count, lr=lr, isSaveWeight=True)
+

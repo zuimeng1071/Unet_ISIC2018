@@ -44,7 +44,7 @@ def preprocess_image(image, image_size):
 def pre(model_name, in_image, image_size=(400, 400), isUseBestWeight=False):
     """整合后处理模块的预测函数"""
     # 加载模型
-    model = load_model(model_name, image_size, isLoadWeight=True, isUseBestWeight=isUseBestWeight)
+    model = load_model(model_name, image_size, isLoadWeight=True, weight_path="")
     if model is None:
         return None, None
 

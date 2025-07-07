@@ -159,8 +159,9 @@ def validate_model(model, val_dataloader, save_images_path):
 
 
 def val(model_name: str, val_images_path: str, val_label_path: str,
-        image_size=(1, 400, 400), isUseBestWeight=False,
-        nums=None):
+        image_size=(1, 400, 400),
+        nums=None,
+        weight_path=None):
     """
     进行模型验证的主要函数
     :param nums: 验证集个数
@@ -168,7 +169,7 @@ def val(model_name: str, val_images_path: str, val_label_path: str,
     :param val_images_path: 测试集图片地址
     :param val_label_path: 测试集图片标签地址
     :param image_size: 图片尺寸，部分模型有要求的最小尺寸
-    :param isUseBestWeight: 是否使用训练时的最佳权重
+    :param weight_path: 权重路径
     :return:
     """
     save_images_path = get_unique_folder_name('./save_img', model_name)
@@ -176,7 +177,7 @@ def val(model_name: str, val_images_path: str, val_label_path: str,
         os.makedirs(save_images_path)
         print('生成目录')
 
-    model = load_model(model_name, image_size, isLoadWeight=True, isUseBestWeight=isUseBestWeight)
+    model = load_model(model_name, image_size, isLoadWeight=True, weight_path=weight_path)
     if model is None:
         return
 
@@ -193,10 +194,16 @@ def val(model_name: str, val_images_path: str, val_label_path: str,
 
 
 if __name__ == "__main__":
-    images_val_path = r"E:\数据集\ISIC2018_Task1-2_Validation_Input"
-    # images_val_path = r"E:\数据集\Val_Input_PCA"
-    label_val_path = r"E:\数据集\ISIC2018_Task1_Validation_GroundTruth"
+    images_val_path = r"../data/黑色素瘤分割/黑色素瘤分割/ISIC2018_Task1-2_Validation_Input"
+    images_val_pca_path = r"../data/黑色素瘤分割/黑色素瘤分割/Val_Input_PCA"
+    label_val_path = r"../data/黑色素瘤分割/黑色素瘤分割/ISIC2018_Task1_Validation_GroundTruth"
     with torch.no_grad():
-        val("Unet",
+        val("DASPP_ChannelAtte_Unet",
             images_val_path, label_val_path,
-            image_size=(400, 400), isUseBestWeight=False)
+            image_size=(400, 400),
+            weight_path="./weight/train_3/end_DASPP_ChannelAtte_Unet_weight.pth")
+        val("DASPP_ChannelAtte_Unet",
+            images_val_pca_path, label_val_path,
+            image_size=(400, 400),
+            weight_path="./weight/train_4/end_DASPP_ChannelAtte_Unet_weight.pth")
+
