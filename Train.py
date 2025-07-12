@@ -417,23 +417,14 @@ def Train(model, images_path: str, labels_path: str,
 
 
 if __name__ == "__main__":
-    images_path = r"../data/黑色素瘤分割/黑色素瘤分割/ISIC2018_Task1-2_Training_Input"
-    label_path = r"../data/黑色素瘤分割/黑色素瘤分割/ISIC2018_Task1_Training_GroundTruth"
-
-    images_path_pca = r"../data/黑色素瘤分割/黑色素瘤分割/Training_Input_PCA"
-
-    batch_size = 4
-    epoch_count = 50
-    lr = 0.001
+    # images_path = r"E:\数据集\Training_Input_PCA"
+    # # images_path = r"E:\数据集\ISIC2018_Task1-2_Training_Input"
+    # label_path = r"E:\数据集\ISIC2018_Task1_Training_GroundTruth"
+    images_path = r"E:\数据集\ISIC2018_Task1-2_Validation_Input"
+    label_path = r"E:\数据集\ISIC2018_Task1_Validation_GroundTruth"
     # 加载预训练模型
-    # U
-    model = load_model('Unet', image_size=(400, 400), isLoadWeight=False)
+    model = load_model('R2U', image_size=(400, 400), isLoadWeight=False)
     if model is not None:
         # 开始训练
-        Train(model, images_path, label_path, batch_size=batch_size, epoch_count=epoch_count, lr=lr, isSaveWeight=True)
-
-    model = load_model('Unet', image_size=(400, 400), isLoadWeight=False)
-    if model is not None:
-        # 开始训练
-        Train(model, images_path_pca, label_path, batch_size=batch_size, epoch_count=epoch_count, lr=lr, isSaveWeight=True)
+        Train(model, images_path, label_path, batch_size=1, epoch_count=2, lr=0.001, isSaveWeight=True)
 

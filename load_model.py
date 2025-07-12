@@ -1,24 +1,22 @@
 import os
 import torch
 
-from Unet_ISIC2018.models.DASPP_ChannelAtte_Unet import DASPP_ChannelAtte_Unet
+from models.AtteUnet import AttU_Net
 from models.ChannelAtte_Unet import ChannelAtte_Unet
-from models.DASPP_OProj_ChannelAtte_UNet import DASPP_OProj_ChannelAtte_UNet
-from models.DASPP_OrthoProj_UNet import DASPP_OrthoProj_UNet
 from models.DASPP_Unet import DASPP_Unet
-from models.OrthoProj_UNet import OrthoProj_UNet
-from models.PCA_Unet import PCA_Unet
+from models.NestedUNet import NestedUNet
+from models.R2U import R2U_Net
+from models.ResUnet import ResUNet
 from models.Unet import Unet
 
 
 def load_model(model_name: str, image_size=(400, 400), isLoadWeight=False, weight_path=None):
     """
     加载模型函数
-    :param model_name: 需要加载的模型 包含 'Unet', 'DASPP_Unet', 'PCA_Unet', 'DASPP_PCA_Unet',
-                       'ChannelAtteUnet', 'DASPP_ChannelAtte_Unet', 'DASPP_OrthoProj_UNet', 'OrthoProj_UNet'
+    :param model_name: 需要加载的模型 包含 Unet DASPP_Unet ChannelAtte_Unet ResUnet R2U NestedUnet AtteUnet
     :param image_size: 输入到模型中的图片尺寸，部分模型有要求的最小尺寸
     :param isLoadWeight: 是否加载原有的权重
-    :param isUseBestWeight: 是否加载最佳的权重
+    :param weight_path: 模型权重文件路径
     :return: 加载好的模型
     """
     weight_dir = './weight'
@@ -29,27 +27,21 @@ def load_model(model_name: str, image_size=(400, 400), isLoadWeight=False, weigh
     # 根据模型名称初始化模型实例
     if model_name == 'Unet':
         model = Unet()
-    elif model_name == 'PCA_Unet':
-        model = PCA_Unet()
     elif model_name == 'DASPP_Unet':
         if image_size[0] <= 192 and image_size[1] <= 192:
             print("图片尺寸过小，该模型要求最小尺寸需大于192*192")
             return None
         model = DASPP_Unet()
-    elif model_name == 'ChannelAtte_Unet':#ChannelAtteUnet
+    elif model_name == 'ChannelAtteUnet':
         model = ChannelAtte_Unet()
-    elif model_name == 'DASPP_ChannelAtte_Unet':
-        if image_size[0] <= 192 and image_size[1] <= 192:
-            print("图片尺寸过小，该模型要求最小尺寸需大于192*192")
-            return None
-        model = DASPP_ChannelAtte_Unet()
-    elif model_name == 'DASPP_OrthoProj_UNet':
-        if image_size[0] <= 192 and image_size[1] <= 192:
-            print("图片尺寸过小，该模型要求最小尺寸需大于192*192")
-            return None
-        model = DASPP_OrthoProj_UNet()
-    elif model_name == 'OrthoProj_UNet':
-        model = OrthoProj_UNet()
+    elif model_name == 'R2U':
+        model = R2U_Net(3, 1, 1)
+    elif model_name == 'NestedUnet':
+        model = NestedUNet(1, 3)
+    elif model_name == 'AtteUnet':
+        model = AttU_Net()
+    elif model_name == 'ResUnet':
+        model = ResUNet()
     else:
         print(f"未知的模型名称: {model_name}")
         return None
