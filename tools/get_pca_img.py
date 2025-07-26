@@ -4,15 +4,18 @@ from PIL import Image
 from sklearn.decomposition import PCA
 from tqdm import tqdm
 
-# input_dir = r"E:\数据集\ISIC2018_Task1-2_Validation_Input"  # 输入图像目录
-# output_dir = r"E:\数据集\Val_Input_PCA"  # 输出图像目录
-input_dir = r"E:\数据集\ISIC2018_Task1-2_Training_Input"  # 输入图像目录
-output_dir = r"E:\数据集\Training_Input_PCA"  # 输出图像目录
+# 输入输出目录
+input_dir = r"E:\数据集\ISIC2018_Task1-2_Validation_Input"  # 输入图像目录
+output_dir = r"E:\数据集\Val_Input_PCA"  # 输出图像目录
+# input_dir = r"E:\数据集\ISIC2018_Task1-2_Training_Input"  # 输入图像目录
+# output_dir = r"E:\数据集\Training_Input_PCA"  # 输出图像目录
 
 # 创建输出目录（如果不存在）
 if not os.path.exists(output_dir):
     os.makedirs(output_dir)
 
+# 用于保存每张图片的总方差解释率
+variance_explained_list = []
 
 def apply_pca_to_image(image, n_components=64):
     # 确保图像是numpy数组格式
@@ -32,9 +35,11 @@ def apply_pca_to_image(image, n_components=64):
 
     # 使用PCA进行降维与重构
     pca = PCA(n_components=n_components)
-
-    # 计算原维度和降维后的维度
     C = pca.fit_transform(im2)  # 进行PCA变换
+
+    # 保存该图像的总方差解释率
+    total_variance = np.sum(pca.explained_variance_ratio_)
+    variance_explained_list.append(total_variance)
 
     # 重构数据
     im3 = pca.inverse_transform(C)
@@ -53,12 +58,12 @@ def apply_pca_to_image(image, n_components=64):
 
 
 # 获取所有待处理的图片路径
-image_files = [os.path.join(input_dir, f) for f in os.listdir(input_dir) if f.endswith(('png', 'jpg', 'jpeg'))]
+image_files = [os.path.join(input_dir, f) for f in os.listdir(input_dir) if f.lower().endswith(('png', 'jpg', 'jpeg'))]
 
+# 处理每张图片
 for img_path in tqdm(image_files, desc='Processing images'):
     try:
         with Image.open(img_path).convert('RGB') as img:
-
             # 应用PCA
             img_processed = apply_pca_to_image(img)
 
@@ -68,4 +73,8 @@ for img_path in tqdm(image_files, desc='Processing images'):
     except Exception as e:
         print(f"处理文件 {img_path} 时出错：{e}")
 
+# 计算并输出平均总方差解释率
+avg_variance_explained = np.mean(variance_explained_list)
+print(f"\n总共处理了 {len(variance_explained_list)} 张图像")
+print(f"平均总方差解释率（保留 {64} 个主成分）: {avg_variance_explained:.4f}")
 print("所有图像处理完毕并保存到", output_dir)

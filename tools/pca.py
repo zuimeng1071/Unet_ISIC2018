@@ -3,7 +3,7 @@ import numpy as np
 from sklearn.decomposition import PCA
 
 # 加载并预处理图像
-img_fn = "ISIC_0012627.jpg"
+img_fn = "ISIC_0017460.jpg"
 img = Image.open(img_fn)
 
 
@@ -28,6 +28,14 @@ def apply_pca_to_image(image, n_components=64):
 
     # 计算原维度和降维后的维度
     C = pca.fit_transform(im2)  # 进行PCA变换
+
+    # 计算平均方差贡献
+    average_variance_contributed = np.mean(pca.explained_variance_ratio_)
+    print(f"平均方差贡献: {average_variance_contributed:.4f}")
+
+    # 总方差贡献
+    total_variance_contributed = np.sum(pca.explained_variance_ratio_)
+    print(f"总方差贡献: {total_variance_contributed:.4f}")
 
     # 重构数据
     im3 = pca.inverse_transform(C)

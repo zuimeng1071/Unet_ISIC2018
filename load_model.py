@@ -3,6 +3,7 @@ import torch
 
 from models.AtteUnet import AttU_Net
 from models.ChannelAtte_Unet import ChannelAtte_Unet
+from models.DASPP_ChannelAtte_UNet import DASPP_ChannelAtte_UNet
 from models.DASPP_Unet import DASPP_Unet
 from models.NestedUNet import NestedUNet
 from models.R2U import R2U_Net
@@ -34,6 +35,8 @@ def load_model(model_name: str, image_size=(400, 400), isLoadWeight=False, weigh
         model = DASPP_Unet()
     elif model_name == 'ChannelAtteUnet':
         model = ChannelAtte_Unet()
+    elif model_name == 'DASPP_ChannelAtte_UNet':
+        model = DASPP_ChannelAtte_UNet()
     elif model_name == 'R2U':
         model = R2U_Net(3, 1, 1)
     elif model_name == 'NestedUnet':
